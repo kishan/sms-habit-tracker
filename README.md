@@ -50,7 +50,7 @@ In [Twilio Console]([url](https://console.twilio.com/)) navigate to PhoneNumbers
 - Ex. Messaging: https://992df4c7ad12c2.localhost.run/sms_reply/
 
 ### 7. Give it a test
-Test out your server by navingating to `/test_sms` endpoint from the public rul obtained above. 
+Test out your server by navingating to `/sms_test` endpoint from the public rul obtained above. 
 Note: You will need to add your phone number as a verified number on the Twilio account if you are on a trail plan
 
-Ex. `https://992df4c7ad12c2.localhost.run/test_sms/`
+Ex. `https://992df4c7ad12c2.localhost.run/sms_test/`
