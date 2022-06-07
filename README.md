@@ -40,6 +40,7 @@ We'll be using [localhost.run](localhost.run) which provides us with a publicly 
   $ python manage.py runserver
   $ ssh -R 80:localhost:8000 localhost.run
 ```
+Note: you will need to add the tunnel url link to ALLOWED_HOSTS & CSRF_TRUSTED_ORIGINS in settings.py
 
 ### 6. Configure Twilio Webhook URLs
 We now need to configure our Twilio phone number to call our webhook URLs whenever a new SMS message or call comes in. For your twilio phone number, set the webhook url for Messaging & Voice to the public url obtained above. 
