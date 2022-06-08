@@ -46,3 +46,17 @@ def sms_reply(request):
 def sms_test(request):
     send_sms(settings.USER_TEST_NUMBER, "hi! This is a test.")
     return HttpResponse('text sent')
+
+def sms_test_morning_reminder(request):
+    send_morning_reminder()
+    return HttpResponse('morning reminder sent')
+
+def send_morning_reminder():
+    # TODO: pull all habits that are due for today, and fetch associated users
+
+    # for now hardcode with test user
+    user_number = settings.USER_TEST_NUMBER
+    user_name = 'Test User'
+    habit_name = 'Test Habit'
+    sms_text = f"Good morning {user_name}! Don't forget to complete your habit for today: {habit_name}"
+    send_sms(user_number, sms_text)
