@@ -54,6 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'habit_tracker',
+
+    # custom apps
+    'users',
 ]
 
 MIDDLEWARE = [
