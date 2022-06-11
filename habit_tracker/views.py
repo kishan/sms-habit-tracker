@@ -6,7 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.twiml.voice_response import VoiceResponse
 
-from .lib_twilio import send_sms, make_call
+from .lib_twilio import send_sms
+
+from users.models import User
 
 def index(request):
     return HttpResponse("Hello, world.")
@@ -44,19 +46,27 @@ def sms_reply(request):
 
 # Endpoint for sending SMS message from Twilio number
 def sms_test(request):
-    send_sms(settings.USER_TEST_NUMBER, "hi! This is a test.")
+    # send text to user1 (kishan)
+    user = User.objects.get(id=1)
+    send_sms(user.cellphone, f"hey {user.get_first_name()} This is a test.")
+
+    # send_sms_to_all_users()
     return HttpResponse('text sent')
 
+def send_sms_to_all_users():
+    users = User.objects.all()
+    for user in users:
+        print("sending test text to: " + user.get_first_name() + " at " + user.cellphone)
+        if user.cellphone:
+            send_sms(user.cellphone, f"hey {user.get_first_name()}! This is a test.")
+
 def sms_test_morning_reminder(request):
-    send_morning_reminder()
+    user = User.objects.get(id=1)
+    send_morning_reminder(user)
     return HttpResponse('morning reminder sent')
 
-def send_morning_reminder():
-    # TODO: pull all habits that are due for today, and fetch associated users
-
-    # for now hardcode with test user
-    user_number = settings.USER_TEST_NUMBER
-    user_name = 'Test User'
+def send_morning_reminder(user: User):
+    # TODO: pull habits for given user
     habit_name = 'Test Habit'
-    sms_text = f"Good morning {user_name}! Don't forget to complete your habit for today: {habit_name}"
-    send_sms(user_number, sms_text)
+    sms_text = f"Good morning {user.get_first_name()} 🌤️ Don't forget to complete your habit for today: {habit_name}"
+    send_sms(user.cellphone, sms_text)
