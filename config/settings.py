@@ -63,8 +63,8 @@ INSTALLED_APPS = [
 
 # Note: if you make any changes here you'll need to re-run: python manage.py crontab add
 CRONJOBS = [
-    # every minute
-    # ('* * * * *', 'habit_tracker.cron.cron_send_test_text'),
+    # 8am daily
+    ('0 8 * * *', 'habit_tracker.cron.cron_send_test_text'),
      # 9am daily
     ('0 9 * * *', 'habit_tracker.cron.cron_log_time'),
 ]
