@@ -18,6 +18,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOGS_PATH = os.path.join(BASE_DIR, "logs")
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,9 +55,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'habit_tracker',
+    'django_crontab',
 
     # custom apps
     'users',
+]
+
+# Note: if you make any changes here you'll need to re-run: python manage.py crontab add
+CRONJOBS = [
+    # every minute
+    # ('* * * * *', 'habit_tracker.cron.cron_send_test_text'),
+     # 9am daily
+    ('0 9 * * *', 'habit_tracker.cron.cron_log_time'),
 ]
 
 AUTH_USER_MODEL = 'users.User' # custom user model

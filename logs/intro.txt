@@ -1,0 +1,2 @@
+feel free to dump any logs in this logs directory
+creating this file so logs directory can be tracked via git
