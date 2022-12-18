@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.twiml.voice_response import VoiceResponse
 
+from habit_tracker.lib_gpt3 import gpt3_get_ai_chat_response
+
 from users.views import get_user_by_cellphone
 
 from .lib_twilio import send_sms
@@ -23,6 +25,10 @@ def sms_reply(request):
     media_link = ''
 
     user_cellphone = request.POST.get('From', '')
+    incoming_msg = request.POST.get('Body', '').lower()
+    print(f'-----\nreceived following message from {user_cellphone}: {incoming_msg}')
+
+    # get user by phone #
     user = get_user_by_cellphone(user_cellphone)
     if not user:
         # TODO: trigger onboarding flow
@@ -30,12 +36,8 @@ def sms_reply(request):
         build_twilio_reply_response('sorry, we did not find user account associated with this number')
     else:
         print('user was found: ' + user.get_first_name())
-    
 
-
-
-    # determine how to respond to incoming message
-    incoming_msg = request.POST.get('Body', '').lower()
+    # determine response to incoming message
     if incoming_msg=='yo':
         msg_body = 'yo dawg!'
     elif incoming_msg=='1':
@@ -46,13 +48,18 @@ def sms_reply(request):
         media_link='https://i.imgur.com/zNxhPjp.jpeg'
     elif incoming_msg=='3':
         msg_body='Have a wonderful day'
+    elif incoming_msg=='menu':
+        msg_body='Here are some options to consider. \n\nReply with:\n1 to receive a GIF \n2 for an image \n3 for an SMS!'
     else:
-        msg_body="""\nInvalid Option. \n\nWelcome to Habbit Buddy! 🎉 \n\nReply with:\n1 to receive a GIF \n2 for an image \n3 for an SMS!"""
+        # use GPT3 as default reply
+        msg_body = gpt3_get_ai_chat_response(incoming_msg)
 
     # prepend name introduction to text
     if user:
-        intro_str = f"hey {user.get_first_name()}! \n"
+        intro_str = f"hey {user.get_first_name()}!\n\n"
         msg_body = intro_str + msg_body
+
+    print(f'-----\nresponding to text with:\n{msg_body}\n-----\n')
 
     twilio_reply_response = build_twilio_reply_response(msg_body, media_link)
     return twilio_reply_response
