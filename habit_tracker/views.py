@@ -20,7 +20,7 @@ def index(request):
 # Endpoint for responding to incoming SMS messages to our Twilio number
 @require_POST
 @csrf_exempt # TODO: address CSRF if deploying to production
-def sms_reply(request):
+def receive_sms(request):
     msg_body = ''
     media_link = ''
 
