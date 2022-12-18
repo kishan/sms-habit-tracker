@@ -8,7 +8,7 @@ from twilio.twiml.voice_response import VoiceResponse
 
 from habit_tracker.lib_gpt3 import gpt3_get_ai_chat_response
 
-from users.views import get_user_by_cellphone
+from users.views import create_user_with_cellphone, get_user_by_cellphone
 
 from .lib_twilio import send_sms
 
@@ -31,15 +31,20 @@ def sms_reply(request):
     # get user by phone #
     user = get_user_by_cellphone(user_cellphone)
     if not user:
-        # TODO: trigger onboarding flow
         print('no user with this phone number was found')
-        build_twilio_reply_response('sorry, we did not find user account associated with this number')
+        user = create_user_with_cellphone(user_cellphone)
+        print(f'successfully created new user. ID = {str(user.id)} phone = {user.cellphone}')
+        return build_twilio_reply_response('👋 Hi!\n\nWelcome to WriteOn: your personalized AI journal assistant. 📕 \n\nPlease reply with your full name to get started')
     else:
-        print('user was found: ' + user.get_first_name())
+        print('user was found: ' + user.get_first_name())        
 
     # determine response to incoming message
     if incoming_msg=='yo':
         msg_body = 'yo dawg!'
+    elif incoming_msg=='d123':
+        print(f'deleting user {user.get_first_name()} with id = {user.id}')
+        user.delete()
+        return build_twilio_reply_response('successfully deleted your user account')
     elif incoming_msg=='1':
         msg_body = 'Gotta love a GIF!'
         media_link= 'https://i.imgur.com/BwmtaWS.gif'
