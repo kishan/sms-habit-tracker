@@ -1,3 +1,5 @@
+import datetime
+from django.utils import timezone
 from django.http import HttpResponse
 from django.conf import settings
 from django.views.decorators.http import require_POST
@@ -7,7 +9,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from twilio.twiml.voice_response import VoiceResponse
 
 from habit_tracker.lib_gpt3 import gpt3_get_ai_chat_response
-from habit_tracker.models import ConversationState
+from habit_tracker.models import ConversationState, JournalEntry
 
 from users.views import create_user_with_cellphone, get_user_by_cellphone, split_full_name
 
@@ -51,8 +53,13 @@ def receive_sms(request):
         return build_twilio_reply_response('successfully deleted your user account')
     elif incoming_msg=='start':
         # hard-coded command to manually kick off journaling flow
-        # TODO: make sure user has not already journaled for today
+        entry_exists = JournalEntry.objects.filter(date=datetime.date.today(), user=user).exists()
+        if entry_exists:
+            x = 1
+            # TODO: return early if user already journaled for today
+            # return build_twilio_reply_response("You've already filled out your journal for today! Please check back in tomorrow.")
         kickoff_reflection_reminder(user)
+        return HttpResponse()
     elif state.state == ConversationState.ASK_NAME:
         # Get user's name from their response and save to DB
         full_name =  request.POST.get('Body', '').title()
@@ -77,6 +84,10 @@ def receive_sms(request):
             state.save()
             print('updated state to ASK_SUMMARY')
 
+            # create new journal entry
+            journal_entry = JournalEntry(date=datetime.date.today(), user=user)
+            journal_entry.save()
+
             msg_body = f'''Awesome! Let's get started. I'll walk you through a series of prompts. Just reply back directly within one message and I'll record your responses.\n\nPrompt #1: How would you summarize your day today? What did you do & any reflections?'''
         else:
             state.state = ConversationState.FINISHED
@@ -85,9 +96,11 @@ def receive_sms(request):
 
             msg_body = f'''Seems like now is not a great time to reflect. Respond anytime with 'start' when you are ready.'''
     elif state.state == ConversationState.ASK_SUMMARY:
+        # Retrieve current journal entry and save user response
         summary_response =  request.POST.get('Body', '')
-        print(f'summary_response: {summary_response}')
-        # TODO: save response
+        entry = JournalEntry.objects.filter(date=datetime.date.today(), user=user, is_complete=False).first()
+        entry.response1 = summary_response
+        entry.save()
 
         # update to next state
         state.state = ConversationState.ASK_WIN
@@ -96,9 +109,11 @@ def receive_sms(request):
 
         msg_body = f'''Prompt #2: What was your biggest win of the day?'''
     elif state.state == ConversationState.ASK_WIN:
+         # Retrieve current journal entry and save user response
         win_response =  request.POST.get('Body', '')
-        print(f'win_response: {win_response}')
-        # TODO: save response
+        entry = JournalEntry.objects.filter(date=datetime.date.today(), user=user, is_complete=False).first()
+        entry.response2 = win_response
+        entry.save()
 
         # update to next state
         state.state = ConversationState.ASK_IMPROVEMENT
@@ -107,9 +122,13 @@ def receive_sms(request):
 
         msg_body = f'''Prompt #3: What could you have done better today?'''
     elif state.state == ConversationState.ASK_IMPROVEMENT:
+        # Retrieve current journal entry and save user response
         improvement_response =  request.POST.get('Body', '')
-        print(f'improvement_response: {improvement_response}')
-        # TODO: save response
+        entry = JournalEntry.objects.filter(date=datetime.date.today(), user=user, is_complete=False).first()
+        entry.response3 = improvement_response
+        entry.is_complete = True
+        entry.completed_at = timezone.make_aware(datetime.datetime.now())
+        entry.save()
 
         # update to next state
         state.state = ConversationState.FINISHED

@@ -27,3 +27,13 @@ class ConversationState(models.Model):
     # Fields for the state model
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default=INITIAL)
+
+class JournalEntry(models.Model):
+    date = models.DateField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    response1 = models.TextField()
+    response2 = models.TextField()
+    response3 = models.TextField()
+    response4 = models.TextField()
+    is_complete = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
