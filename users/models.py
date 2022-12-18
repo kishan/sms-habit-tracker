@@ -42,7 +42,6 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     # Email field that serves as the username field
     email = models.EmailField( 
-        unique=True,
         verbose_name = "Email",
     )
     # need to include is_staff as it's included in django's AdminUser check
@@ -62,6 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=timezone.now
     )
     cellphone = models.CharField(
+        unique=True,
         max_length=20, 
         null=True,
         blank=True,
@@ -69,7 +69,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     # is_active = models.BooleanField(default=True)
 
-    USERNAME_FIELD = 'email' # this defines the unique identifier for the User model
+    # USERNAME_FIELD = 'email' # this defines the unique identifier for the User model
+    USERNAME_FIELD = 'cellphone' # this defines the unique identifier for the User model
     REQUIRED_FIELDS = ['first_name', 'last_name'] # specify any other fields to be require when creating a new user
 
     objects = UserManager()
