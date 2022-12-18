@@ -21,6 +21,7 @@ from datetime import datetime
 #
 
 def cron_send_test_text():
+    # TODO: update to send text to ALL users
     phone_number = settings.USER_TEST_NUMBER
     print('sending text via cron to: ' + phone_number)
     send_sms(phone_number, f"Good morning! Have a lovely day 😊")

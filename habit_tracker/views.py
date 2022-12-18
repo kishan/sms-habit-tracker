@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.twiml.voice_response import VoiceResponse
 
+from users.views import get_user_by_cellphone
+
 from .lib_twilio import send_sms
 
 from users.models import User
@@ -17,16 +19,25 @@ def index(request):
 @require_POST
 @csrf_exempt # TODO: address CSRF if deploying to production
 def sms_reply(request):
-    incoming_msg = request.POST.get('Body', '').lower()
-
-    # create Twilio response
-    response = MessagingResponse()
-
     msg_body = ''
     media_link = ''
 
+    user_cellphone = request.POST.get('From', '')
+    user = get_user_by_cellphone(user_cellphone)
+    if not user:
+        # TODO: trigger onboarding flow
+        print('no user with this phone number was found')
+        build_twilio_reply_response('sorry, we did not find user account associated with this number')
+    else:
+        print('user was found: ' + user.get_first_name())
+    
+
+
+
+    # determine how to respond to incoming message
+    incoming_msg = request.POST.get('Body', '').lower()
     if incoming_msg=='yo':
-        msg_body = 'yo dawg'
+        msg_body = 'yo dawg!'
     elif incoming_msg=='1':
         msg_body = 'Gotta love a GIF!'
         media_link= 'https://i.imgur.com/BwmtaWS.gif'
@@ -38,11 +49,24 @@ def sms_reply(request):
     else:
         msg_body="""\nInvalid Option. \n\nWelcome to Habbit Buddy! 🎉 \n\nReply with:\n1 to receive a GIF \n2 for an image \n3 for an SMS!"""
 
+    # prepend name introduction to text
+    if user:
+        intro_str = f"hey {user.get_first_name()}! \n"
+        msg_body = intro_str + msg_body
+
+    twilio_reply_response = build_twilio_reply_response(msg_body, media_link)
+    return twilio_reply_response
+
+def build_twilio_reply_response(msg_body='', media_link = ''):
+    # create Twilio response
+    response = MessagingResponse()
+
     msg = response.message(str(msg_body))
     if media_link:
         msg.media(media_link)
 
     return HttpResponse(response)
+    
 
 # Endpoint for sending SMS message from Twilio number
 def sms_test(request):

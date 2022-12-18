@@ -94,6 +94,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_username(self):
         return self.email
+    
+    def get_cellphone(self):
+        return self.cellphone
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
