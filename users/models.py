@@ -67,6 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         verbose_name = "Cell Phone",
     )
+    personal_intention = models.TextField(default='')
     # is_active = models.BooleanField(default=True)
 
     # USERNAME_FIELD = 'email' # this defines the unique identifier for the User model
@@ -98,6 +99,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def get_cellphone(self):
         return self.cellphone
+    
+    def get_personal_intention(self):
+        return self.personal_intention
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"

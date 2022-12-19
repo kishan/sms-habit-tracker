@@ -39,12 +39,12 @@ DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '1e7b9478ffa810.lhrtunnel.link',
+    '7dc154550c0cb0.lhr.life',
     '127.0.0.1',
 ]
 
 # need 
-CSRF_TRUSTED_ORIGINS = ['https://1e7b9478ffa810.lhrtunnel.link']
+CSRF_TRUSTED_ORIGINS = ['https://7dc154550c0cb0.lhr.life']
 
 # Application definition
 
